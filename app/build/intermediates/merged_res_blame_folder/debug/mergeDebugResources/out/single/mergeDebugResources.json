@@ -1,0 +1,38 @@
+[
+    {
+        "merged": "com.jswidgets.android.app-debug-56:/drawable_ic_launcher_background.xml.flat",
+        "source": "com.jswidgets.android.app-main-58:/drawable/ic_launcher_background.xml"
+    },
+    {
+        "merged": "com.jswidgets.android.app-debug-56:/layout_widget_content_layout.xml.flat",
+        "source": "com.jswidgets.android.app-main-58:/layout/widget_content_layout.xml"
+    },
+    {
+        "merged": "com.jswidgets.android.app-debug-56:/layout_widget_layout_initial.xml.flat",
+        "source": "com.jswidgets.android.app-main-58:/layout/widget_layout_initial.xml"
+    },
+    {
+        "merged": "com.jswidgets.android.app-debug-56:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "com.jswidgets.android.app-main-58:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "com.jswidgets.android.app-debug-56:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.jswidgets.android.app-main-58:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "com.jswidgets.android.app-debug-56:/drawable_widget_background_rounded.xml.flat",
+        "source": "com.jswidgets.android.app-main-58:/drawable/widget_background_rounded.xml"
+    },
+    {
+        "merged": "com.jswidgets.android.app-debug-56:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "com.jswidgets.android.app-main-58:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "com.jswidgets.android.app-debug-56:/xml_jswidget_info.xml.flat",
+        "source": "com.jswidgets.android.app-main-58:/xml/jswidget_info.xml"
+    },
+    {
+        "merged": "com.jswidgets.android.app-debug-56:/layout_widget_config_activity.xml.flat",
+        "source": "com.jswidgets.android.app-main-58:/layout/widget_config_activity.xml"
+    }
+]

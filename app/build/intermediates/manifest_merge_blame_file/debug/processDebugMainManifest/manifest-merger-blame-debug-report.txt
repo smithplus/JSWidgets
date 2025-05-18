@@ -1,0 +1,186 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.jswidgets.android"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="26"
+9        android:targetSdkVersion="33" />
+10
+11    <uses-permission android:name="android.permission.INTERNET" />
+11-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:4:5-67
+11-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:4:22-64
+12    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+12-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:5:5-80
+12-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:5:22-77
+13    <uses-permission
+13-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:6:5-108
+14        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+14-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:6:22-78
+15        android:maxSdkVersion="28" />
+15-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:6:79-105
+16
+17    <permission
+17-->[androidx.core:core:1.9.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/e8efe9ddb68af6f79b482a57a619265b/transformed/core-1.9.0/AndroidManifest.xml:22:5-24:47
+18        android:name="com.jswidgets.android.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+18-->[androidx.core:core:1.9.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/e8efe9ddb68af6f79b482a57a619265b/transformed/core-1.9.0/AndroidManifest.xml:23:9-81
+19        android:protectionLevel="signature" />
+19-->[androidx.core:core:1.9.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/e8efe9ddb68af6f79b482a57a619265b/transformed/core-1.9.0/AndroidManifest.xml:24:9-44
+20
+21    <uses-permission android:name="com.jswidgets.android.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+21-->[androidx.core:core:1.9.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/e8efe9ddb68af6f79b482a57a619265b/transformed/core-1.9.0/AndroidManifest.xml:26:5-97
+21-->[androidx.core:core:1.9.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/e8efe9ddb68af6f79b482a57a619265b/transformed/core-1.9.0/AndroidManifest.xml:26:22-94
+22
+23    <application
+23-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:8:5-43:19
+24        android:allowBackup="true"
+24-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:9:9-35
+25        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+25-->[androidx.core:core:1.9.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/e8efe9ddb68af6f79b482a57a619265b/transformed/core-1.9.0/AndroidManifest.xml:28:18-86
+26        android:debuggable="true"
+27        android:extractNativeLibs="false"
+28        android:icon="@mipmap/ic_launcher"
+28-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:10:9-43
+29        android:label="@string/app_name"
+29-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:11:9-41
+30        android:roundIcon="@mipmap/ic_launcher_round"
+30-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:12:9-54
+31        android:supportsRtl="true"
+31-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:13:9-35
+32        android:testOnly="true"
+33        android:theme="@style/Theme.JSWidgets" >
+33-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:14:9-47
+34        <activity
+34-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:16:9-23:20
+35            android:name="com.jswidgets.android.MainActivity"
+35-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:17:13-41
+36            android:exported="true" >
+36-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:18:13-36
+37            <intent-filter>
+37-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:19:13-22:29
+38                <action android:name="android.intent.action.MAIN" />
+38-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:20:17-69
+38-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:20:25-66
+39
+40                <category android:name="android.intent.category.LAUNCHER" />
+40-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:21:17-77
+40-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:21:27-74
+41            </intent-filter>
+42        </activity>
+43        <activity
+43-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:25:9-31:20
+44            android:name="com.jswidgets.android.WidgetConfigActivity"
+44-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:26:13-49
+45            android:exported="true" >
+45-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:27:13-36
+46            <intent-filter>
+46-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:28:13-30:29
+47                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+47-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:29:17-87
+47-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:29:25-84
+48            </intent-filter>
+49        </activity>
+50
+51        <receiver
+51-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:33:9-42:20
+52            android:name="com.jswidgets.android.widget.JSWidgetProvider"
+52-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:34:13-52
+53            android:exported="true" >
+53-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:35:13-36
+54            <intent-filter>
+54-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:36:13-38:29
+55                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+55-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:37:17-84
+55-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:37:25-81
+56            </intent-filter>
+57
+58            <meta-data
+58-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:39:13-41:57
+59                android:name="android.appwidget.provider"
+59-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:40:17-58
+60                android:resource="@xml/jswidget_info" />
+60-->/Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:41:17-54
+61        </receiver>
+62
+63        <activity
+63-->[androidx.compose.ui:ui-test-manifest:1.4.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/de692f5ce09517e1e27c26a8904cfff2/transformed/ui-test-manifest-1.4.0/AndroidManifest.xml:23:9-25:39
+64            android:name="androidx.activity.ComponentActivity"
+64-->[androidx.compose.ui:ui-test-manifest:1.4.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/de692f5ce09517e1e27c26a8904cfff2/transformed/ui-test-manifest-1.4.0/AndroidManifest.xml:24:13-63
+65            android:exported="true" />
+65-->[androidx.compose.ui:ui-test-manifest:1.4.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/de692f5ce09517e1e27c26a8904cfff2/transformed/ui-test-manifest-1.4.0/AndroidManifest.xml:25:13-36
+66        <activity
+66-->[androidx.compose.ui:ui-tooling:1.4.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/855a564af9aac361cd227ee4d5424cbb/transformed/ui-tooling-1.4.0/AndroidManifest.xml:23:9-25:39
+67            android:name="androidx.compose.ui.tooling.PreviewActivity"
+67-->[androidx.compose.ui:ui-tooling:1.4.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/855a564af9aac361cd227ee4d5424cbb/transformed/ui-tooling-1.4.0/AndroidManifest.xml:24:13-71
+68            android:exported="true" />
+68-->[androidx.compose.ui:ui-tooling:1.4.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/855a564af9aac361cd227ee4d5424cbb/transformed/ui-tooling-1.4.0/AndroidManifest.xml:25:13-36
+69
+70        <provider
+70-->[androidx.emoji2:emoji2:1.3.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/e42e68fbb11a29b7d5d3894148415166/transformed/emoji2-1.3.0/AndroidManifest.xml:24:9-32:20
+71            android:name="androidx.startup.InitializationProvider"
+71-->[androidx.emoji2:emoji2:1.3.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/e42e68fbb11a29b7d5d3894148415166/transformed/emoji2-1.3.0/AndroidManifest.xml:25:13-67
+72            android:authorities="com.jswidgets.android.androidx-startup"
+72-->[androidx.emoji2:emoji2:1.3.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/e42e68fbb11a29b7d5d3894148415166/transformed/emoji2-1.3.0/AndroidManifest.xml:26:13-68
+73            android:exported="false" >
+73-->[androidx.emoji2:emoji2:1.3.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/e42e68fbb11a29b7d5d3894148415166/transformed/emoji2-1.3.0/AndroidManifest.xml:27:13-37
+74            <meta-data
+74-->[androidx.emoji2:emoji2:1.3.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/e42e68fbb11a29b7d5d3894148415166/transformed/emoji2-1.3.0/AndroidManifest.xml:29:13-31:52
+75                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+75-->[androidx.emoji2:emoji2:1.3.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/e42e68fbb11a29b7d5d3894148415166/transformed/emoji2-1.3.0/AndroidManifest.xml:30:17-75
+76                android:value="androidx.startup" />
+76-->[androidx.emoji2:emoji2:1.3.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/e42e68fbb11a29b7d5d3894148415166/transformed/emoji2-1.3.0/AndroidManifest.xml:31:17-49
+77            <meta-data
+77-->[androidx.lifecycle:lifecycle-process:2.6.1] /Users/martinsmith/.gradle/caches/8.10.2/transforms/6d67da12b807ad6967c1f2b80a70129d/transformed/lifecycle-process-2.6.1/AndroidManifest.xml:29:13-31:52
+78                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+78-->[androidx.lifecycle:lifecycle-process:2.6.1] /Users/martinsmith/.gradle/caches/8.10.2/transforms/6d67da12b807ad6967c1f2b80a70129d/transformed/lifecycle-process-2.6.1/AndroidManifest.xml:30:17-78
+79                android:value="androidx.startup" />
+79-->[androidx.lifecycle:lifecycle-process:2.6.1] /Users/martinsmith/.gradle/caches/8.10.2/transforms/6d67da12b807ad6967c1f2b80a70129d/transformed/lifecycle-process-2.6.1/AndroidManifest.xml:31:17-49
+80            <meta-data
+80-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/c9b134ee27ce5e1bc902933a199c59e8/transformed/profileinstaller-1.3.0/AndroidManifest.xml:29:13-31:52
+81                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+81-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/c9b134ee27ce5e1bc902933a199c59e8/transformed/profileinstaller-1.3.0/AndroidManifest.xml:30:17-85
+82                android:value="androidx.startup" />
+82-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/c9b134ee27ce5e1bc902933a199c59e8/transformed/profileinstaller-1.3.0/AndroidManifest.xml:31:17-49
+83        </provider>
+84
+85        <receiver
+85-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/c9b134ee27ce5e1bc902933a199c59e8/transformed/profileinstaller-1.3.0/AndroidManifest.xml:34:9-52:20
+86            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+86-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/c9b134ee27ce5e1bc902933a199c59e8/transformed/profileinstaller-1.3.0/AndroidManifest.xml:35:13-76
+87            android:directBootAware="false"
+87-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/c9b134ee27ce5e1bc902933a199c59e8/transformed/profileinstaller-1.3.0/AndroidManifest.xml:36:13-44
+88            android:enabled="true"
+88-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/c9b134ee27ce5e1bc902933a199c59e8/transformed/profileinstaller-1.3.0/AndroidManifest.xml:37:13-35
+89            android:exported="true"
+89-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/c9b134ee27ce5e1bc902933a199c59e8/transformed/profileinstaller-1.3.0/AndroidManifest.xml:38:13-36
+90            android:permission="android.permission.DUMP" >
+90-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/c9b134ee27ce5e1bc902933a199c59e8/transformed/profileinstaller-1.3.0/AndroidManifest.xml:39:13-57
+91            <intent-filter>
+91-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/c9b134ee27ce5e1bc902933a199c59e8/transformed/profileinstaller-1.3.0/AndroidManifest.xml:40:13-42:29
+92                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+92-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/c9b134ee27ce5e1bc902933a199c59e8/transformed/profileinstaller-1.3.0/AndroidManifest.xml:41:17-91
+92-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/c9b134ee27ce5e1bc902933a199c59e8/transformed/profileinstaller-1.3.0/AndroidManifest.xml:41:25-88
+93            </intent-filter>
+94            <intent-filter>
+94-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/c9b134ee27ce5e1bc902933a199c59e8/transformed/profileinstaller-1.3.0/AndroidManifest.xml:43:13-45:29
+95                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+95-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/c9b134ee27ce5e1bc902933a199c59e8/transformed/profileinstaller-1.3.0/AndroidManifest.xml:44:17-85
+95-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/c9b134ee27ce5e1bc902933a199c59e8/transformed/profileinstaller-1.3.0/AndroidManifest.xml:44:25-82
+96            </intent-filter>
+97            <intent-filter>
+97-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/c9b134ee27ce5e1bc902933a199c59e8/transformed/profileinstaller-1.3.0/AndroidManifest.xml:46:13-48:29
+98                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+98-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/c9b134ee27ce5e1bc902933a199c59e8/transformed/profileinstaller-1.3.0/AndroidManifest.xml:47:17-88
+98-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/c9b134ee27ce5e1bc902933a199c59e8/transformed/profileinstaller-1.3.0/AndroidManifest.xml:47:25-85
+99            </intent-filter>
+100            <intent-filter>
+100-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/c9b134ee27ce5e1bc902933a199c59e8/transformed/profileinstaller-1.3.0/AndroidManifest.xml:49:13-51:29
+101                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+101-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/c9b134ee27ce5e1bc902933a199c59e8/transformed/profileinstaller-1.3.0/AndroidManifest.xml:50:17-95
+101-->[androidx.profileinstaller:profileinstaller:1.3.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/c9b134ee27ce5e1bc902933a199c59e8/transformed/profileinstaller-1.3.0/AndroidManifest.xml:50:25-92
+102            </intent-filter>
+103        </receiver>
+104    </application>
+105
+106</manifest>
