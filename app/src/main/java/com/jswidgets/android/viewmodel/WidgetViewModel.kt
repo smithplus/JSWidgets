@@ -13,6 +13,14 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
 import java.util.UUID
+import android.os.Build
+import android.os.Environment
+import android.net.Uri
+import android.provider.DocumentsContract
+import androidx.documentfile.provider.DocumentFile
+import java.io.FileOutputStream
+import java.io.InputStream
+import java.io.OutputStream
 
 class WidgetViewModel : ViewModel() {
     private val _widgets = MutableStateFlow<List<Widget>>(emptyList())
@@ -27,43 +35,11 @@ class WidgetViewModel : ViewModel() {
 
     fun loadWidgets(context: Context) {
         viewModelScope.launch {
-            val userWidgetsDir = File(context.getExternalFilesDir(null), "widgets")
-            val loadedWidgets = mutableListOf<Widget>()
-
-            // 1. Cargar scripts de usuario
-            if (userWidgetsDir.exists() && userWidgetsDir.isDirectory) {
-                userWidgetsDir.listFiles { _, name -> name.endsWith(".js") }?.forEach { file ->
-                    try {
-                        val content = file.readText()
-                        val widgetName = file.nameWithoutExtension
-                        loadedWidgets.add(Widget(id = widgetName, name = widgetName, scriptContent = content))
-                    } catch (e: IOException) {
-                        Log.e("WidgetViewModel", "Error leyendo el script de usuario: ${file.name}", e)
-                    }
-                }
-            }
-
-            // 2. Cargar siempre los scripts de ejemplo desde assets (sin duplicar si ya existe uno de usuario con el mismo nombre)
-            try {
-                val assetManager = context.assets
-                val exampleScripts = listOf("time_widget.js", "date_widget.js", "greeting_widget.js", "btc_price_widget.js", "best_sale_widget.js")
-                exampleScripts.forEach { scriptFileName ->
-                    val widgetName = scriptFileName.removeSuffix(".js")
-                    val alreadyExists = loadedWidgets.any { it.name == widgetName }
-                    if (!alreadyExists) {
-                        try {
-                            val inputStream = assetManager.open("scripts/$scriptFileName")
-                            val content = inputStream.bufferedReader().use { it.readText() }
-                            loadedWidgets.add(Widget(id = widgetName, name = widgetName, scriptContent = content, isExample = true))
-                        } catch (e: IOException) {
-                            Log.e("WidgetViewModel", "Error leyendo el script de asset: $scriptFileName", e)
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e("WidgetViewModel", "Error cargando scripts de ejemplo desde assets", e)
-            }
-            _widgets.value = loadedWidgets
+            val userWidgets = loadUserWidgets(context)
+            val exampleWidgets = loadExampleScripts(context)
+            // No duplicar por nombre
+            val allWidgets = userWidgets + exampleWidgets.filter { ex -> userWidgets.none { it.name == ex.name } }
+            _widgets.value = allWidgets
         }
     }
 
@@ -94,26 +70,49 @@ class WidgetViewModel : ViewModel() {
         }
     }
 
-    fun updateWidget(context: Context, widget: Widget) {
-        // Para los scripts de usuario, el nombre es el ID. Si el nombre cambia, es un "renombrar".
-        // Si el id original (nombre de archivo antiguo) es diferente al nuevo nombre, tratamos como guardar y borrar el antiguo.
-        // Por ahora, updateWidget asume que el ID (nombre) no ha cambiado, solo el contenido.
-        // Si el widget era un ejemplo, guardarlo lo convierte en un widget de usuario.
+    fun updateWidget(context: Context, widgetWithPotentialUpdates: Widget) {
+        // widgetWithPotentialUpdates contiene: id (original), name (posiblemente nuevo), scriptContent (posiblemente nuevo)
+        viewModelScope.launch {
+            val originalWidgetInList = _widgets.value.find { it.id == widgetWithPotentialUpdates.id }
 
-        val originalWidget = _widgets.value.find { it.id == widget.id }
-        
-        saveWidget(context, widget.copy(id = widget.name, isExample = false)) // Guardar siempre como widget de usuario
+            // El widget que representa el estado final a persistir y mostrar en la lista.
+            // Su id y name deben ser el nuevo nombre del script.
+            val finalWidgetState = widgetWithPotentialUpdates.copy(
+                id = widgetWithPotentialUpdates.name, // El id ahora es el nuevo nombre
+                isExample = false // Al guardar/actualizar, deja de ser un ejemplo
+            )
 
-        // Si el nombre original (ID) es diferente al nuevo nombre y el original no era un ejemplo,
-        // significa que se renombró un widget de usuario, así que borramos el archivo antiguo.
-        if (originalWidget != null && originalWidget.name != widget.name && !originalWidget.isExample) {
-             val userWidgetsDir = File(context.getExternalFilesDir(null), "widgets")
-             val oldFile = File(userWidgetsDir, "${originalWidget.name}.js")
-             if (oldFile.exists()) {
-                 if (!oldFile.delete()) {
-                     Log.w("WidgetViewModel", "No se pudo borrar el archivo del widget antiguo tras renombrar: ${originalWidget.name}.js")
-                 }
-             }
+            // 1. Guardar el archivo del script (con el nuevo nombre si cambió)
+            val fileSaved = saveUserScriptFile(context, finalWidgetState.name, finalWidgetState.scriptContent)
+
+            if (fileSaved) {
+                // 2. Si el archivo se guardó correctamente, proceder a borrar el archivo antiguo (si hubo renombramiento de un script de usuario)
+                if (originalWidgetInList != null && originalWidgetInList.name != finalWidgetState.name && !originalWidgetInList.isExample) {
+                    val userWidgetsDir = File(context.getExternalFilesDir(null), "widgets")
+                    val oldFile = File(userWidgetsDir, "${originalWidgetInList.name}.js")
+                    if (oldFile.exists()) {
+                        if (oldFile.delete()) {
+                            Log.d("WidgetViewModel", "Archivo antiguo ${originalWidgetInList.name}.js borrado tras renombrar a ${finalWidgetState.name}.js")
+                        } else {
+                            Log.w("WidgetViewModel", "No se pudo borrar el archivo del widget antiguo: ${originalWidgetInList.name}.js")
+                        }
+                    }
+                }
+
+                // 3. Actualizar la lista _widgets en memoria
+                _widgets.update { currentList ->
+                    val listAfterRemoval = if (originalWidgetInList != null) {
+                        currentList.filterNot { it.id == originalWidgetInList.id }
+                    } else {
+                        currentList
+                    }
+                    listAfterRemoval + finalWidgetState // Añadir el estado final del widget
+                }
+                Log.d("WidgetViewModel", "Widget ${finalWidgetState.name} actualizado en la lista y archivo.")
+            } else {
+                Log.e("WidgetViewModel", "No se pudo guardar el archivo para ${finalWidgetState.name}, la lista de widgets no se actualizará.")
+                // Considerar notificar al usuario del error de guardado.
+            }
         }
     }
 
@@ -175,6 +174,83 @@ class WidgetViewModel : ViewModel() {
             }
             // Quitar de la lista en cualquier caso (sea de ejemplo o de usuario cuyo archivo se borró o no existía)
             _widgets.update { list -> list.filterNot { it.id == widgetToDelete.id } }
+        }
+    }
+
+    fun getUserScriptsDir(context: Context): File {
+        val publicDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
+        val jsWidgetsDir = File(publicDir, "JSWidgets")
+        if (!jsWidgetsDir.exists()) {
+            jsWidgetsDir.mkdirs()
+        }
+        return jsWidgetsDir
+    }
+
+    fun loadUserScripts(context: Context): List<File> {
+        val dir = getUserScriptsDir(context)
+        return dir.listFiles { file -> file.extension == "js" }?.toList() ?: emptyList()
+    }
+
+    fun saveUserScript(context: Context, name: String, content: String) {
+        val dir = getUserScriptsDir(context)
+        val file = File(dir, name)
+        file.writeText(content)
+    }
+
+    fun loadExampleScripts(context: Context): List<Widget> {
+        val widgets = mutableListOf<Widget>()
+        try {
+            val assetManager = context.assets
+            val scriptFiles = assetManager.list("scripts")?.filter { it.endsWith(".js") } ?: emptyList()
+            Log.d("WidgetViewModel", "Scripts encontrados en assets/scripts/: $scriptFiles")
+            
+            scriptFiles.forEach { scriptFileName ->
+                val widgetName = scriptFileName.removeSuffix(".js")
+                try {
+                    val inputStream = assetManager.open("scripts/$scriptFileName")
+                    val content = inputStream.bufferedReader().use { it.readText() }
+                    widgets.add(Widget(id = widgetName, name = widgetName, scriptContent = content, isExample = true))
+                    Log.d("WidgetViewModel", "Script cargado exitosamente: $scriptFileName")
+                } catch (e: IOException) {
+                    Log.e("WidgetViewModel", "Error leyendo el script de asset: $scriptFileName", e)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("WidgetViewModel", "Error cargando scripts de ejemplo desde assets", e)
+        }
+        Log.d("WidgetViewModel", "Total de scripts de ejemplo cargados: ${widgets.size}")
+        return widgets
+    }
+
+    fun loadUserWidgets(context: Context): List<Widget> {
+        val dir = getUserScriptsDir(context)
+        return dir.listFiles { file -> file.extension == "js" }?.map { file ->
+            Widget(
+                id = file.nameWithoutExtension,
+                name = file.nameWithoutExtension,
+                scriptContent = file.readText(),
+                isExample = false
+            )
+        } ?: emptyList()
+    }
+
+    // saveWidget ahora solo guarda el archivo y no modifica _widgets
+    fun saveUserScriptFile(context: Context, scriptName: String, scriptContent: String): Boolean {
+        return try {
+            val userWidgetsDir = File(context.getExternalFilesDir(null), "widgets")
+            if (!userWidgetsDir.exists()) {
+                if (!userWidgetsDir.mkdirs()) {
+                    Log.e("WidgetViewModel", "Error al crear el directorio de widgets de usuario para guardar archivo.")
+                    return false
+                }
+            }
+            val widgetFile = File(userWidgetsDir, "$scriptName.js")
+            widgetFile.writeText(scriptContent)
+            Log.d("WidgetViewModel", "Archivo $scriptName.js guardado.")
+            true
+        } catch (e: IOException) {
+            Log.e("WidgetViewModel", "Error al guardar el archivo del widget: $scriptName.js", e)
+            false
         }
     }
 } 

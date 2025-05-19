@@ -19,14 +19,6 @@ import java.net.URL
 import android.os.Handler
 import android.os.Looper
 
-// ContextFactory personalizado para establecer el ClassLoader
-class AndroidContextFactory : ContextFactory() {
-    override fun onContextCreated(cx: RhinoContext) {
-        super.onContextCreated(cx)
-        cx.applicationClassLoader = RhinoContext::class.java.classLoader
-    }
-}
-
 class JSWidgetProvider : AppWidgetProvider() {
 
     override fun onUpdate(
@@ -131,7 +123,7 @@ class JSWidgetProvider : AppWidgetProvider() {
                 } catch (e: Exception) {
                     val errorMsg = e.message?.take(80) ?: "Error desconocido"
                     Log.e("JSWidgetProvider", "Error ejecutando script $scriptName para widget $appWidgetId", e)
-                    views.setTextViewText(R.id.widget_title, scriptName?.removeSuffix(".js") ?: "Error")
+                    views.setTextViewText(R.id.widget_title, scriptName.removeSuffix(".js"))
                     views.setTextViewText(R.id.widget_body, "Error: $errorMsg")
                 }
                 Handler(Looper.getMainLooper()).post {
@@ -166,13 +158,27 @@ class JSWidgetProvider : AppWidgetProvider() {
                 // Inyectar función httpGet para peticiones HTTP desde JS puro
                 scope.put("httpGet", scope, object : BaseFunction() {
                     override fun call(cx: org.mozilla.javascript.Context?, scope: Scriptable?, thisObj: Scriptable?, args: Array<out Any>?): Any {
-                        val urlString = args?.getOrNull(0)?.toString() ?: return "Error: url vacío"
+                        if (args == null || args.isEmpty()) {
+                            return "Error: url es requerida"
+                        }
+                        val firstArg: Any? = args[0]
+                        val urlString = firstArg?.toString() ?: return "Error: url inválida (null o no string)"
+                        val headersObj = if (args.size > 1) args[1] else null
                         return try {
                             val url = URL(urlString)
                             val connection = url.openConnection() as HttpURLConnection
                             connection.requestMethod = "GET"
                             connection.connectTimeout = 8000
                             connection.readTimeout = 8000
+                            // Si hay headers, agregarlos
+                            if (headersObj is Scriptable) {
+                                val ids = headersObj.ids
+                                for (id in ids) {
+                                    val key = id.toString()
+                                    val value = headersObj.get(key, headersObj)?.toString() ?: continue
+                                    connection.setRequestProperty(key, value)
+                                }
+                            }
                             val responseCode = connection.responseCode
                             if (responseCode == 200) {
                                 connection.inputStream.bufferedReader().use { it.readText() }

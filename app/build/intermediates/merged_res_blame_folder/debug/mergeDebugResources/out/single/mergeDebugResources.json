@@ -8,16 +8,32 @@
         "source": "/Users/martinsmith/.gradle/daemon/8.10.2/com.jswidgets.android.app-main-58:/drawable/ic_launcher_foreground.xml"
     },
     {
-        "merged": "/Users/martinsmith/.gradle/daemon/8.10.2/com.jswidgets.android.app-debug-56:/drawable_widget_background_rounded.xml.flat",
-        "source": "/Users/martinsmith/.gradle/daemon/8.10.2/com.jswidgets.android.app-main-58:/drawable/widget_background_rounded.xml"
-    },
-    {
         "merged": "/Users/martinsmith/.gradle/daemon/8.10.2/com.jswidgets.android.app-debug-56:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
         "source": "/Users/martinsmith/.gradle/daemon/8.10.2/com.jswidgets.android.app-main-58:/mipmap-anydpi-v26/ic_launcher_round.xml"
     },
     {
         "merged": "/Users/martinsmith/.gradle/daemon/8.10.2/com.jswidgets.android.app-debug-56:/mipmap-anydpi-v26_ic_launcher.xml.flat",
         "source": "/Users/martinsmith/.gradle/daemon/8.10.2/com.jswidgets.android.app-main-58:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "/Users/martinsmith/.gradle/daemon/8.10.2/com.jswidgets.android.app-debug-56:/layout_widget_layout_initial.xml.flat",
+        "source": "/Users/martinsmith/.gradle/daemon/8.10.2/com.jswidgets.android.app-main-58:/layout/widget_layout_initial.xml"
+    },
+    {
+        "merged": "/Users/martinsmith/.gradle/daemon/8.10.2/com.jswidgets.android.app-debug-56:/layout_widget_config_activity.xml.flat",
+        "source": "/Users/martinsmith/.gradle/daemon/8.10.2/com.jswidgets.android.app-main-58:/layout/widget_config_activity.xml"
+    },
+    {
+        "merged": "/Users/martinsmith/.gradle/daemon/8.10.2/com.jswidgets.android.app-debug-56:/drawable_widget_background_rounded.xml.flat",
+        "source": "/Users/martinsmith/.gradle/daemon/8.10.2/com.jswidgets.android.app-main-58:/drawable/widget_background_rounded.xml"
+    },
+    {
+        "merged": "com.jswidgets.android.app-debug-56:/layout_list_item_script_config.xml.flat",
+        "source": "com.jswidgets.android.app-main-58:/layout/list_item_script_config.xml"
+    },
+    {
+        "merged": "/Users/martinsmith/.gradle/daemon/8.10.2/com.jswidgets.android.app-debug-56:/menu_main_menu.xml.flat",
+        "source": "/Users/martinsmith/.gradle/daemon/8.10.2/com.jswidgets.android.app-main-58:/menu/main_menu.xml"
     },
     {
         "merged": "/Users/martinsmith/.gradle/daemon/8.10.2/com.jswidgets.android.app-debug-56:/drawable_ic_launcher_background.xml.flat",
@@ -28,15 +44,11 @@
         "source": "/Users/martinsmith/.gradle/daemon/8.10.2/com.jswidgets.android.app-main-58:/layout/widget_content_layout.xml"
     },
     {
-        "merged": "com.jswidgets.android.app-debug-56:/xml_jswidget_info.xml.flat",
-        "source": "com.jswidgets.android.app-main-58:/xml/jswidget_info.xml"
+        "merged": "/Users/martinsmith/.gradle/daemon/8.10.2/com.jswidgets.android.app-debug-56:/layout_activity_settings.xml.flat",
+        "source": "/Users/martinsmith/.gradle/daemon/8.10.2/com.jswidgets.android.app-main-58:/layout/activity_settings.xml"
     },
     {
-        "merged": "/Users/martinsmith/.gradle/daemon/8.10.2/com.jswidgets.android.app-debug-56:/layout_widget_layout_initial.xml.flat",
-        "source": "/Users/martinsmith/.gradle/daemon/8.10.2/com.jswidgets.android.app-main-58:/layout/widget_layout_initial.xml"
-    },
-    {
-        "merged": "/Users/martinsmith/.gradle/daemon/8.10.2/com.jswidgets.android.app-debug-56:/layout_widget_config_activity.xml.flat",
-        "source": "/Users/martinsmith/.gradle/daemon/8.10.2/com.jswidgets.android.app-main-58:/layout/widget_config_activity.xml"
+        "merged": "/Users/martinsmith/.gradle/daemon/8.10.2/com.jswidgets.android.app-debug-56:/layout_list_item_script_config.xml.flat",
+        "source": "/Users/martinsmith/.gradle/daemon/8.10.2/com.jswidgets.android.app-main-58:/layout/list_item_script_config.xml"
     }
 ]

@@ -1,7 +1,0 @@
-#Sun May 18 04:42:56 ART 2025
-base.0=/Users/martinsmith/Desktop/AndroidWidgets/app/build/intermediates/dex/debugAndroidTest/mergeProjectDexDebugAndroidTest/0/classes.dex
-base.1=/Users/martinsmith/Desktop/AndroidWidgets/app/build/intermediates/dex/debugAndroidTest/mergeProjectDexDebugAndroidTest/12/classes.dex
-path.0=0/classes.dex
-path.1=12/classes.dex
-renamed.0=classes.dex
-renamed.1=classes2.dex

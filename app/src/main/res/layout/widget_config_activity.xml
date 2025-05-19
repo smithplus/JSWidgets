@@ -12,6 +12,30 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:layout_marginBottom="8dp"/>
 
+    <LinearLayout
+        android:id="@+id/permission_denied_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#FFF3F3"
+        android:padding="16dp"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Para usar tus propios scripts, necesitas conceder permiso de almacenamiento."
+            android:textColor="#D32F2F"
+            android:layout_marginBottom="8dp"/>
+
+        <Button
+            android:id="@+id/open_settings_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Abrir Configuración"/>
+
+    </LinearLayout>
+
     <ListView
         android:id="@+id/scripts_list_view"
         android:layout_width="match_parent"

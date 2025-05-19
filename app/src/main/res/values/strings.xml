@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">JSWidgets</string>
+    <string name="dev_guide_1">- Los scripts deben estar escritos en JavaScript puro (ES5/ES6). - No hay acceso a clases Java ni a librerías externas. - Puedes usar la función httpGet(url, headers) para hacer peticiones HTTP GET.</string>
+
+    <string name="dev_guide_2">El segundo parámetro de httpGet es opcional y debe ser un objeto JS con los headers deseados. Ejemplo: httpGet(&quot;https://api.ejemplo.com&quot;, { Authorization: \'Bearer TU_TOKEN\' })</string>
+
+    <string name="dev_guide_3">- El script debe retornar un objeto con las propiedades: title, body, backgroundColor, textColor, textSize, textAlign. - Usa JSON.parse para procesar respuestas de APIs. - No hay soporte para imágenes ni almacenamiento local.</string>
+
+    <string name="dev_guide_4">- El tiempo de ejecución es limitado: evita bucles infinitos o cálculos pesados. - Si ocurre un error, el widget mostrará un mensaje de error. - Los scripts de usuario se guardan en la carpeta Documents/JSWidgets/ y pueden ser editados o importados/exportados fácilmente. Para ejemplos y documentación, revisa los scripts de ejemplo incluidos en la app.</string>
 </resources> 

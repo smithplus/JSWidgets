@@ -1,7 +1,6 @@
 package com.jswidgets.android
 
 import android.Manifest
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -15,46 +14,30 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.Text
-import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.jswidgets.android.model.Widget
 import com.jswidgets.android.ui.theme.JSWidgetsTheme
 import com.jswidgets.android.viewmodel.WidgetViewModel
-import java.io.File
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.AlertDialog
-import androidx.compose.ui.platform.LocalContext
-import android.widget.RemoteViews
-import com.jswidgets.android.R
+import com.jswidgets.android.widget.AndroidContextFactory
 import org.mozilla.javascript.ContextFactory
 import org.mozilla.javascript.Scriptable
-import androidx.compose.ui.unit.sp
-import com.jswidgets.android.widget.AndroidContextFactory
 import org.mozilla.javascript.BaseFunction
 import java.net.HttpURLConnection
 import java.net.URL
@@ -78,26 +61,10 @@ val scriptColors = listOf(
 
 class MainActivity : ComponentActivity() {
     private val viewModel: WidgetViewModel by viewModels()
-    
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        val readGranted = permissions.getOrDefault(Manifest.permission.READ_EXTERNAL_STORAGE, false)
-
-        if (readGranted) {
-            Log.d("MainActivity", "READ_EXTERNAL_STORAGE permission granted via dialog")
-            viewModel.loadWidgets(this)
-        } else {
-            Log.d("MainActivity", "READ_EXTERNAL_STORAGE permission denied via dialog")
-            Toast.makeText(this, "Permiso de lectura denegado. No se podrán cargar widgets de usuario desde el almacenamiento. Se usarán los ejemplos.", Toast.LENGTH_LONG).show()
-            viewModel.loadWidgets(this) // Cargar ejemplos si se deniega
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
-        // Primero, configurar la UI
+        viewModel.loadWidgets(this)
         setContent {
             JSWidgetsTheme {
                 Surface(
@@ -106,13 +73,14 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val widgets by viewModel.widgets.collectAsState()
                     val currentWidget by viewModel.currentWidget.collectAsState()
+                    val context = LocalContext.current
 
                     when {
                         currentWidget != null -> {
                             WidgetEditorScreen(
                                 widget = currentWidget!!,
-                                onSave = { name, content ->
-                                    viewModel.updateWidget(this, Widget(name, name, content))
+                                onSave = { widgetToSave ->
+                                    viewModel.updateWidget(context, widgetToSave)
                                     viewModel.setCurrentWidget(null)
                                 },
                                 onCancel = {
@@ -123,7 +91,6 @@ class MainActivity : ComponentActivity() {
                         else -> {
                             WidgetListScreen(
                                 widgets = widgets,
-                                onAddWidget = { viewModel.setCurrentWidget(Widget("", "", "")) },
                                 onEditWidget = { widget -> viewModel.setCurrentWidget(widget) },
                                 viewModel = viewModel
                             )
@@ -132,33 +99,12 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-        
-        // Luego, verificar permisos y cargar datos
-        checkAndRequestStoragePermission()
-    }
-
-    private fun checkAndRequestStoragePermission() {
-        val permissionsToRequest = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
-        
-        val allPermissionsGranted = permissionsToRequest.all {
-            ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
-        }
-
-        if (allPermissionsGranted) {
-            Log.d("MainActivity", "READ_EXTERNAL_STORAGE permission already granted")
-            viewModel.loadWidgets(this) // Cargar widgets si el permiso ya está concedido
-            return
-        }
-        
-        Log.d("MainActivity", "READ_EXTERNAL_STORAGE permission not granted, requesting...")
-        requestPermissionLauncher.launch(permissionsToRequest)
     }
 }
 
 @Composable
 fun WidgetListScreen(
     widgets: List<Widget>,
-    onAddWidget: () -> Unit,
     onEditWidget: (Widget) -> Unit,
     viewModel: WidgetViewModel
 ) {
@@ -166,33 +112,36 @@ fun WidgetListScreen(
     var showDeleteDialog by remember { mutableStateOf<Widget?>(null) }
     val context = androidx.compose.ui.platform.LocalContext.current
 
+    val userWidgets = widgets.filter { !it.isExample }
+    val exampleWidgets = widgets.filter { it.isExample }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Scripts", color = MaterialTheme.colors.onPrimary) },
                 navigationIcon = {
-                    IconButton(onClick = { /* TODO: Acción de configuración */ }) {
+                    IconButton(onClick = {
+                        context.startActivity(Intent(context, SettingsActivity::class.java))
+                    }) {
                         Icon(Icons.Filled.Settings, contentDescription = "Configuración", tint = MaterialTheme.colors.onPrimary)
                     }
                 },
                 actions = {
-                    IconButton(onClick = onAddWidget) {
+                    IconButton(onClick = { viewModel.setCurrentWidget(Widget("", "", "")) }) {
                         Icon(Icons.Filled.Add, contentDescription = "Agregar Widget", tint = MaterialTheme.colors.onPrimary)
                     }
                 },
-                backgroundColor = MaterialTheme.colors.primary // O un color específico
+                backgroundColor = MaterialTheme.colors.primary
             )
         }
-    ) { padding ->
+    ) { _ ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
                 .padding(16.dp)
         ) {
-            // Campo de búsqueda (placeholder)
             OutlinedTextField(
-                value = "", 
+                value = "",
                 onValueChange = {},
                 label = { Text("Search") },
                 modifier = Modifier
@@ -200,19 +149,15 @@ fun WidgetListScreen(
                     .padding(bottom = 16.dp)
             )
 
-            if (widgets.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("No hay scripts. ¡Crea uno nuevo!")
-                }
+            Text("Tus scripts", style = MaterialTheme.typography.subtitle1)
+            if (userWidgets.isEmpty()) {
+                Text("No tienes scripts de usuario.", color = Color.Gray)
             } else {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    itemsIndexed(widgets) { index, widget ->
+                    items(userWidgets) { widget ->
                         WidgetItem(
                             widget = widget,
-                            color = scriptColors[index % scriptColors.size],
+                            color = Color(0xFF4CAF50),
                             onItemClick = { onEditWidget(widget) },
                             onEditActionClick = { onEditWidget(widget) },
                             onRenameActionClick = { showRenameDialog = widget },
@@ -221,30 +166,61 @@ fun WidgetListScreen(
                     }
                 }
             }
+
+            Spacer(Modifier.height(24.dp))
+            Text("Ejemplos", style = MaterialTheme.typography.subtitle1)
+            if (exampleWidgets.isEmpty()) {
+                Text("No hay scripts de ejemplo.", color = Color.Gray)
+            } else {
+                val exampleColors = listOf(
+                    Color(0xFF3F51B5), // Indigo
+                    Color(0xFFFFC107), // Amber
+                    Color(0xFFE91E63), // Pink
+                    Color(0xFF009688), // Teal
+                    Color(0xFF795548), // Brown
+                    Color(0xFF9C27B0), // Purple
+                    Color(0xFF03A9F4), // Light Blue
+                    Color(0xFFCDDC39), // Lime
+                    Color(0xFFFF5722), // Deep Orange
+                    Color(0xFF4CAF50)  // Green
+                )
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    itemsIndexed(exampleWidgets) { index, widget ->
+                        WidgetItem(
+                            widget = widget,
+                            color = exampleColors[index % exampleColors.size],
+                            onItemClick = { onEditWidget(widget) },
+                            onEditActionClick = { onEditWidget(widget) },
+                            onRenameActionClick = {},
+                            onDeleteActionClick = {}
+                        )
+                    }
+                }
+            }
         }
-    }
 
-    // Diálogos
-    showRenameDialog?.let { widgetToRename ->
-        RenameDialog(
-            currentName = widgetToRename.name,
-            onConfirm = { newName ->
-                viewModel.renameWidget(context, widgetToRename, newName)
-                showRenameDialog = null
-            },
-            onDismiss = { showRenameDialog = null }
-        )
-    }
+        // Diálogos
+        showRenameDialog?.let { widgetToRename ->
+            RenameDialog(
+                currentName = widgetToRename.name,
+                onConfirm = { newName ->
+                    viewModel.renameWidget(context, widgetToRename, newName)
+                    showRenameDialog = null
+                },
+                onDismiss = { showRenameDialog = null }
+            )
+        }
 
-    showDeleteDialog?.let { widgetToDelete ->
-        ConfirmDeleteDialog(
-            widgetName = widgetToDelete.name,
-            onConfirm = {
-                viewModel.deleteWidget(context, widgetToDelete)
-                showDeleteDialog = null
-            },
-            onDismiss = { showDeleteDialog = null }
-        )
+        showDeleteDialog?.let { widgetToDelete ->
+            ConfirmDeleteDialog(
+                widgetName = widgetToDelete.name,
+                onConfirm = {
+                    viewModel.deleteWidget(context, widgetToDelete)
+                    showDeleteDialog = null
+                },
+                onDismiss = { showDeleteDialog = null }
+            )
+        }
     }
 }
 
@@ -382,7 +358,7 @@ fun ConfirmDeleteDialog(
 @Composable
 fun WidgetEditorScreen(
     widget: Widget,
-    onSave: (String, String) -> Unit,
+    onSave: (Widget) -> Unit,
     onCancel: () -> Unit
 ) {
     var name by remember { mutableStateOf(widget.name) }
@@ -393,87 +369,82 @@ fun WidgetEditorScreen(
     var previewError by remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        if (widget.id.isEmpty()) "Nuevo Script" else "Editar Script",
-                        color = MaterialTheme.colors.onPrimary
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onCancel) {
-                        Icon(Icons.Filled.Close, contentDescription = "Cancelar", tint = MaterialTheme.colors.onPrimary)
-                    }
-                },
-                actions = {
-                    IconButton(onClick = {
-                        // Ejecutar el script y mostrar el preview en background
-                        coroutineScope.launch(Dispatchers.IO) {
-                            try {
-                                val result = executeJsScriptPreview(scriptContent)
-                                previewResult = result
-                                previewError = null
-                            } catch (e: Exception) {
-                                previewResult = null
-                                previewError = e.message
-                            }
-                            showPreview = true
-                        }
-                    }) {
-                        Icon(Icons.Filled.PlayArrow, contentDescription = "Preview", tint = MaterialTheme.colors.onPrimary)
-                    }
-                    TextButton(
-                        onClick = {
-                            if (name.isNotBlank() && scriptContent.isNotBlank()) {
-                                onSave(name, scriptContent)
-                            } else {
-                                showError = true
-                            }
-                        }
-                    ) {
-                        Text("GUARDAR", color = MaterialTheme.colors.onPrimary)
-                    }
-                },
-                backgroundColor = MaterialTheme.colors.primary
-            )
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp)
-        ) {
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = { Text("Nombre del Script") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                singleLine = true
-            )
-
-            if (showError) {
-                Text(
-                    text = "El nombre y el contenido del script no pueden estar vacíos.",
-                    color = MaterialTheme.colors.error,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = onCancel) {
+                Icon(Icons.Filled.Close, contentDescription = "Cancelar", tint = MaterialTheme.colors.primary)
             }
+            Spacer(Modifier.width(8.dp))
+            Text(
+                if (widget.id.isEmpty()) "Nuevo Script" else "Editar Script",
+                style = MaterialTheme.typography.h6,
+                color = MaterialTheme.colors.primary
+            )
+            Spacer(Modifier.weight(1f))
+            IconButton(onClick = {
+                coroutineScope.launch(Dispatchers.IO) {
+                    try {
+                        val result = executeJsScriptPreview(scriptContent)
+                        previewResult = result
+                        previewError = null
+                    } catch (e: Exception) {
+                        previewResult = null
+                        previewError = e.message
+                    }
+                    showPreview = true
+                }
+            }) {
+                Icon(Icons.Filled.PlayArrow, contentDescription = "Preview", tint = MaterialTheme.colors.primary)
+            }
+            TextButton(
+                onClick = {
+                    if (name.isNotBlank() && scriptContent.isNotBlank()) {
+                        val widgetBeingEdited = widget
+                        val updatedWidget = widgetBeingEdited.copy(
+                            name = name,
+                            scriptContent = scriptContent
+                        )
+                        onSave(updatedWidget)
+                    } else {
+                        showError = true
+                    }
+                }
+            ) {
+                Text("GUARDAR", color = MaterialTheme.colors.primary)
+            }
+        }
 
-            OutlinedTextField(
-                value = scriptContent,
-                onValueChange = { newScriptContent: String -> scriptContent = newScriptContent },
-                label = { Text("Código JavaScript") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                textStyle = TextStyle(fontFamily = FontFamily.Monospace)
+        OutlinedTextField(
+            value = name,
+            onValueChange = { name = it },
+            label = { Text("Nombre del Script") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            singleLine = true
+        )
+
+        if (showError) {
+            Text(
+                text = "El nombre y el contenido del script no pueden estar vacíos.",
+                color = MaterialTheme.colors.error,
+                modifier = Modifier.padding(bottom = 8.dp)
             )
         }
+
+        OutlinedTextField(
+            value = scriptContent,
+            onValueChange = { newScriptContent: String -> scriptContent = newScriptContent },
+            label = { Text("Código JavaScript") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            textStyle = TextStyle(fontFamily = FontFamily.Monospace)
+        )
 
         if (showPreview) {
             PreviewWidgetDialog(
@@ -513,7 +484,6 @@ fun executeJsScriptPreview(script: String): Scriptable? {
         if (!ContextFactory.hasExplicitGlobal()) {
             ContextFactory.initGlobal(AndroidContextFactory())
         }
-        var lastResult: Any? = null
         var lastError: String? = null
         val result = ContextFactory.getGlobal().call { rhino ->
             rhino.optimizationLevel = -1
@@ -523,13 +493,27 @@ fun executeJsScriptPreview(script: String): Scriptable? {
             // Inyectar función httpGet para peticiones HTTP desde JS puro
             scope.put("httpGet", scope, object : BaseFunction() {
                 override fun call(cx: org.mozilla.javascript.Context?, scope: Scriptable?, thisObj: Scriptable?, args: Array<out Any>?): Any {
-                    val urlString = args?.getOrNull(0)?.toString() ?: return "Error: url vacío"
+                    if (args == null || args.isEmpty()) {
+                        return "Error: url es requerida"
+                    }
+                    val firstArg: Any? = args[0]
+                    val urlString = firstArg?.toString() ?: return "Error: url inválida (null o no string)"
+                    val headersObj = if (args.size > 1) args[1] else null
                     return try {
                         val url = URL(urlString)
                         val connection = url.openConnection() as HttpURLConnection
                         connection.requestMethod = "GET"
                         connection.connectTimeout = 8000
                         connection.readTimeout = 8000
+                        // Si hay headers, agregarlos
+                        if (headersObj is Scriptable) {
+                            val ids = headersObj.ids
+                            for (id in ids) {
+                                val key = id.toString()
+                                val value = headersObj.get(key, headersObj)?.toString() ?: continue
+                                connection.setRequestProperty(key, value)
+                            }
+                        }
                         val responseCode = connection.responseCode
                         if (responseCode == 200) {
                             connection.inputStream.bufferedReader().use { it.readText() }
@@ -546,8 +530,7 @@ fun executeJsScriptPreview(script: String): Scriptable? {
             rhino.setClassShutter { _ -> false }
             
             try {
-                lastResult = rhino.evaluateString(scope, script, "JSWidgetScriptPreview", 1, null)
-                lastResult
+                rhino.evaluateString(scope, script, "JSWidgetScriptPreview", 1, null)
             } catch (e: Exception) {
                 lastError = e.message
                 null
