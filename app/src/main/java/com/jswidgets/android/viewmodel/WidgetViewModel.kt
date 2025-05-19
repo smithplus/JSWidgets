@@ -29,40 +29,39 @@ class WidgetViewModel : ViewModel() {
         viewModelScope.launch {
             val userWidgetsDir = File(context.getExternalFilesDir(null), "widgets")
             val loadedWidgets = mutableListOf<Widget>()
-            var loadedFromUserFiles = false
 
+            // 1. Cargar scripts de usuario
             if (userWidgetsDir.exists() && userWidgetsDir.isDirectory) {
                 userWidgetsDir.listFiles { _, name -> name.endsWith(".js") }?.forEach { file ->
                     try {
                         val content = file.readText()
-                        // Usamos el nombre del archivo (sin .js) como ID y nombre inicial
                         val widgetName = file.nameWithoutExtension
                         loadedWidgets.add(Widget(id = widgetName, name = widgetName, scriptContent = content))
-                        loadedFromUserFiles = true
                     } catch (e: IOException) {
                         Log.e("WidgetViewModel", "Error leyendo el script de usuario: ${file.name}", e)
                     }
                 }
             }
 
-            if (!loadedFromUserFiles && loadedWidgets.isEmpty()) {
-                Log.i("WidgetViewModel", "No user widgets found or loaded, loading example widgets from assets.")
-                try {
-                    val assetManager = context.assets
-                    val exampleScripts = listOf("time_widget.js", "date_widget.js", "greeting_widget.js", "btc_price_widget.js")
-                    exampleScripts.forEach { scriptFileName ->
+            // 2. Cargar siempre los scripts de ejemplo desde assets (sin duplicar si ya existe uno de usuario con el mismo nombre)
+            try {
+                val assetManager = context.assets
+                val exampleScripts = listOf("time_widget.js", "date_widget.js", "greeting_widget.js", "btc_price_widget.js", "best_sale_widget.js")
+                exampleScripts.forEach { scriptFileName ->
+                    val widgetName = scriptFileName.removeSuffix(".js")
+                    val alreadyExists = loadedWidgets.any { it.name == widgetName }
+                    if (!alreadyExists) {
                         try {
                             val inputStream = assetManager.open("scripts/$scriptFileName")
                             val content = inputStream.bufferedReader().use { it.readText() }
-                            val widgetName = scriptFileName.removeSuffix(".js")
                             loadedWidgets.add(Widget(id = widgetName, name = widgetName, scriptContent = content, isExample = true))
                         } catch (e: IOException) {
                             Log.e("WidgetViewModel", "Error leyendo el script de asset: $scriptFileName", e)
                         }
                     }
-                } catch (e: Exception) {
-                    Log.e("WidgetViewModel", "Error cargando scripts de ejemplo desde assets", e)
                 }
+            } catch (e: Exception) {
+                Log.e("WidgetViewModel", "Error cargando scripts de ejemplo desde assets", e)
             }
             _widgets.value = loadedWidgets
         }

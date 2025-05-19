@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -47,6 +48,19 @@ import java.io.File
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.AlertDialog
+import androidx.compose.ui.platform.LocalContext
+import android.widget.RemoteViews
+import com.jswidgets.android.R
+import org.mozilla.javascript.ContextFactory
+import org.mozilla.javascript.Scriptable
+import androidx.compose.ui.unit.sp
+import com.jswidgets.android.widget.AndroidContextFactory
+import org.mozilla.javascript.BaseFunction
+import java.net.HttpURLConnection
+import java.net.URL
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 // Lista de colores para los items de script
 val scriptColors = listOf(
@@ -374,6 +388,10 @@ fun WidgetEditorScreen(
     var name by remember { mutableStateOf(widget.name) }
     var scriptContent by remember { mutableStateOf(widget.scriptContent) }
     var showError by remember { mutableStateOf(false) }
+    var showPreview by remember { mutableStateOf(false) }
+    var previewResult by remember { mutableStateOf<org.mozilla.javascript.Scriptable?>(null) }
+    var previewError by remember { mutableStateOf<String?>(null) }
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -390,6 +408,22 @@ fun WidgetEditorScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = {
+                        // Ejecutar el script y mostrar el preview en background
+                        coroutineScope.launch(Dispatchers.IO) {
+                            try {
+                                val result = executeJsScriptPreview(scriptContent)
+                                previewResult = result
+                                previewError = null
+                            } catch (e: Exception) {
+                                previewResult = null
+                                previewError = e.message
+                            }
+                            showPreview = true
+                        }
+                    }) {
+                        Icon(Icons.Filled.PlayArrow, contentDescription = "Preview", tint = MaterialTheme.colors.onPrimary)
+                    }
                     TextButton(
                         onClick = {
                             if (name.isNotBlank() && scriptContent.isNotBlank()) {
@@ -440,5 +474,161 @@ fun WidgetEditorScreen(
                 textStyle = TextStyle(fontFamily = FontFamily.Monospace)
             )
         }
+
+        if (showPreview) {
+            PreviewWidgetDialog(
+                scriptName = name,
+                result = previewResult,
+                error = previewError,
+                onDismiss = { showPreview = false }
+            )
+        }
     }
+}
+
+/**
+ * Ejecuta un script JavaScript puro y retorna el resultado.
+ * Los scripts deben retornar un objeto con las siguientes propiedades opcionales:
+ * - title: string (título del widget)
+ * - body: string (contenido del widget)
+ * - backgroundColor: string (color de fondo en formato hex, ej: "#FF0000")
+ * - textColor: string (color del texto en formato hex)
+ * - textSize: number (tamaño del texto en sp)
+ * - textAlign: string ("left", "center", "right")
+ * 
+ * Ejemplo de script válido:
+ * ```
+ * ({
+ *   title: "Mi Widget",
+ *   body: "Contenido del widget",
+ *   backgroundColor: "#263238",
+ *   textColor: "#FFFFFF",
+ *   textSize: 16,
+ *   textAlign: "center"
+ * })
+ * ```
+ */
+fun executeJsScriptPreview(script: String): Scriptable? {
+    try {
+        if (!ContextFactory.hasExplicitGlobal()) {
+            ContextFactory.initGlobal(AndroidContextFactory())
+        }
+        var lastResult: Any? = null
+        var lastError: String? = null
+        val result = ContextFactory.getGlobal().call { rhino ->
+            rhino.optimizationLevel = -1
+            val scope: Scriptable = rhino.initStandardObjects()
+            // Inyectar variable para indicar que es preview
+            scope.put("IS_PREVIEW", scope, true)
+            // Inyectar función httpGet para peticiones HTTP desde JS puro
+            scope.put("httpGet", scope, object : BaseFunction() {
+                override fun call(cx: org.mozilla.javascript.Context?, scope: Scriptable?, thisObj: Scriptable?, args: Array<out Any>?): Any {
+                    val urlString = args?.getOrNull(0)?.toString() ?: return "Error: url vacío"
+                    return try {
+                        val url = URL(urlString)
+                        val connection = url.openConnection() as HttpURLConnection
+                        connection.requestMethod = "GET"
+                        connection.connectTimeout = 8000
+                        connection.readTimeout = 8000
+                        val responseCode = connection.responseCode
+                        if (responseCode == 200) {
+                            connection.inputStream.bufferedReader().use { it.readText() }
+                        } else {
+                            "Error: HTTP $responseCode"
+                        }
+                    } catch (e: Exception) {
+                        Log.e("JSWidgets-httpGet", "Error en httpGet para url: $urlString", e)
+                        "Error: ${e.message ?: e.javaClass.simpleName}"
+                    }
+                }
+            })
+            // Deshabilitar acceso a clases Java
+            rhino.setClassShutter { _ -> false }
+            
+            try {
+                lastResult = rhino.evaluateString(scope, script, "JSWidgetScriptPreview", 1, null)
+                lastResult
+            } catch (e: Exception) {
+                lastError = e.message
+                null
+            }
+        }
+        if (result is Scriptable) {
+            return result
+        } else {
+            if (lastError != null) throw Exception(lastError)
+            throw Exception("El script debe retornar un objeto. Ejemplo:\n({ title: 'Mi Widget', body: 'Contenido' })")
+        }
+    } catch (e: Exception) {
+        throw e
+    }
+}
+
+@Composable
+fun PreviewWidgetDialog(
+    scriptName: String,
+    result: Scriptable?,
+    error: String?,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Vista Previa del Widget") },
+        text = {
+            if (error != null) {
+                Text("Error al ejecutar el script:\n$error")
+            } else if (result != null) {
+                val jsTitle = result.get("title", result)
+                val jsBody = result.get("body", result)
+                val jsBgColor = result.get("backgroundColor", result)
+                val jsTextColor = result.get("textColor", result)
+                val jsTextSize = result.get("textSize", result)
+                val jsTextAlign = result.get("textAlign", result)
+
+                val finalTitle = if (jsTitle != null && jsTitle != Scriptable.NOT_FOUND) jsTitle.toString() else scriptName
+                val finalBody = if (jsBody != null && jsBody != Scriptable.NOT_FOUND) jsBody.toString() else "Contenido no disponible"
+                val backgroundColor = try { Color(android.graphics.Color.parseColor(jsBgColor?.toString() ?: "#263238")) } catch (_: Exception) { Color(0xFF263238) }
+                val textColor = try { Color(android.graphics.Color.parseColor(jsTextColor?.toString() ?: "#FFFFFF")) } catch (_: Exception) { Color.White }
+                val textSize = (jsTextSize?.toString()?.toFloatOrNull() ?: 16f)
+                val textAlign = when (jsTextAlign?.toString()?.lowercase()) {
+                    "center" -> androidx.compose.ui.text.style.TextAlign.Center
+                    "right" -> androidx.compose.ui.text.style.TextAlign.Right
+                    else -> androidx.compose.ui.text.style.TextAlign.Left
+                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(backgroundColor, shape = RoundedCornerShape(16.dp))
+                        .padding(20.dp)
+                ) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            finalTitle,
+                            style = MaterialTheme.typography.h6.copy(
+                                color = textColor,
+                                fontSize = androidx.compose.ui.unit.TextUnit.Unspecified
+                            ),
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = textAlign
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            finalBody,
+                            color = textColor,
+                            fontSize = textSize.sp,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = textAlign
+                        )
+                    }
+                }
+            } else {
+                Text("No hay resultado para mostrar.")
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cerrar")
+            }
+        }
+    )
 } 

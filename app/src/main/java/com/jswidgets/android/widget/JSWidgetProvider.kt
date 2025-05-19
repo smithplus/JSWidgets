@@ -13,6 +13,11 @@ import org.mozilla.javascript.ContextFactory
 import org.mozilla.javascript.Scriptable
 import java.io.File
 import java.io.IOException
+import org.mozilla.javascript.BaseFunction
+import java.net.HttpURLConnection
+import java.net.URL
+import android.os.Handler
+import android.os.Looper
 
 // ContextFactory personalizado para establecer el ClassLoader
 class AndroidContextFactory : ContextFactory() {
@@ -47,63 +52,92 @@ class JSWidgetProvider : AppWidgetProvider() {
             appWidgetManager: AppWidgetManager,
             appWidgetId: Int
         ) {
-            val scriptName = WidgetConfigActivity.loadScriptPref(context, appWidgetId)
-            val views = RemoteViews(context.packageName, R.layout.widget_content_layout) // Nuevo layout para contenido
+            Thread {
+                val scriptName = WidgetConfigActivity.loadScriptPref(context, appWidgetId)
+                val views = RemoteViews(context.packageName, R.layout.widget_content_layout)
 
-            if (scriptName == null) {
-                views.setTextViewText(R.id.widget_title, "Error")
-                views.setTextViewText(R.id.widget_body, "Widget no configurado. Por favor, elimínelo y vuelva a añadirlo.")
-                appWidgetManager.updateAppWidget(appWidgetId, views)
-                return
-            }
-
-            try {
-                // Intentar cargar primero desde los scripts de usuario (almacenamiento externo privado)
-                val userWidgetsDir = File(context.getExternalFilesDir(null), "widgets")
-                val userScriptFile = File(userWidgetsDir, scriptName)
-                var scriptContent: String? = null
-                var scriptSource = ""
-
-                if (userScriptFile.exists()) {
-                    scriptContent = userScriptFile.readText()
-                    scriptSource = "user script"
-                } else {
-                    // Si no está en los scripts de usuario, intentar cargarlo desde assets (ejemplos)
-                    try {
-                        val assetManager = context.assets
-                        val inputStream = assetManager.open("scripts/$scriptName")
-                        scriptContent = inputStream.bufferedReader().use { it.readText() }
-                        scriptSource = "asset script"
-                    } catch (e: IOException) {
-                        Log.w("JSWidgetProvider", "Script '$scriptName' no encontrado en assets ni en scripts de usuario.")
+                if (scriptName == null) {
+                    views.setTextViewText(R.id.widget_title, "Error")
+                    views.setTextViewText(R.id.widget_body, "Widget no configurado. Por favor, elimínelo y vuelva a añadirlo.")
+                    Handler(Looper.getMainLooper()).post {
+                        appWidgetManager.updateAppWidget(appWidgetId, views)
                     }
+                    return@Thread
                 }
 
-                if (scriptContent != null) {
+                try {
+                    val userWidgetsDir = File(context.getExternalFilesDir(null), "widgets")
+                    val userScriptFile = File(userWidgetsDir, scriptName)
+                    lateinit var scriptContent: String
+                    lateinit var scriptSource: String
+
+                    if (userScriptFile.exists()) {
+                        try {
+                            scriptContent = userScriptFile.readText()
+                            scriptSource = "user script"
+                            Log.d("JSWidgetProvider", "Script cargado exitosamente desde almacenamiento de usuario")
+                        } catch (e: SecurityException) {
+                            Log.e("JSWidgetProvider", "Error de permisos al leer script de usuario: ", e)
+                            views.setTextViewText(R.id.widget_title, "Error de Permisos")
+                            views.setTextViewText(R.id.widget_body, "No se puede acceder al script. Verifica los permisos de la app.")
+                            Handler(Looper.getMainLooper()).post {
+                                appWidgetManager.updateAppWidget(appWidgetId, views)
+                            }
+                            return@Thread
+                        }
+                    } else {
+                        try {
+                            val assetManager = context.assets
+                            val inputStream = assetManager.open("scripts/$scriptName")
+                            scriptContent = inputStream.bufferedReader().use { it.readText() }
+                            scriptSource = "asset script"
+                            Log.d("JSWidgetProvider", "Script cargado exitosamente desde assets")
+                        } catch (e: IOException) {
+                            Log.e("JSWidgetProvider", "Error al leer script desde assets: ", e)
+                            views.setTextViewText(R.id.widget_title, scriptName.removeSuffix(".js"))
+                            views.setTextViewText(R.id.widget_body, "Script no encontrado en assets")
+                            Handler(Looper.getMainLooper()).post {
+                                appWidgetManager.updateAppWidget(appWidgetId, views)
+                            }
+                            return@Thread
+                        } catch (e: SecurityException) {
+                            Log.e("JSWidgetProvider", "Error de permisos al leer script desde assets: ", e)
+                            views.setTextViewText(R.id.widget_title, "Error de Permisos")
+                            views.setTextViewText(R.id.widget_body, "No se puede acceder al script. Verifica los permisos de la app.")
+                            Handler(Looper.getMainLooper()).post {
+                                appWidgetManager.updateAppWidget(appWidgetId, views)
+                            }
+                            return@Thread
+                        }
+                    }
+
                     Log.i("JSWidgetProvider", "Ejecutando script '$scriptName' (desde $scriptSource) para widget $appWidgetId")
                     Log.d("JSWidgetProvider", "Contenido del script $scriptName:\n$scriptContent")
-                    val result = executeJsScript(scriptContent) 
+                    val result = executeJsScript(scriptContent)
                     Log.d("JSWidgetProvider", "Resultado de executeJsScript para $scriptName: $result")
 
-                    // Asumimos que el resultado es un objeto con title y body
                     val jsTitle = result?.get("title", result)
                     val jsBody = result?.get("body", result)
 
+                    Log.d("JSWidgetProvider", "jsTitle: $jsTitle, jsBody: $jsBody")
+
                     val finalTitle = if (jsTitle != null && jsTitle != Scriptable.NOT_FOUND) jsTitle.toString() else scriptName.removeSuffix(".js")
                     val finalBody = if (jsBody != null && jsBody != Scriptable.NOT_FOUND) jsBody.toString() else "Contenido no disponible"
-                    
+
+                    Log.d("JSWidgetProvider", "finalTitle: $finalTitle, finalBody: $finalBody")
+
                     views.setTextViewText(R.id.widget_title, finalTitle)
                     views.setTextViewText(R.id.widget_body, finalBody)
-                } else {
-                    views.setTextViewText(R.id.widget_title, scriptName.removeSuffix(".js"))
-                    views.setTextViewText(R.id.widget_body, "Script no encontrado")
+                } catch (e: Exception) {
+                    val errorMsg = e.message?.take(80) ?: "Error desconocido"
+                    Log.e("JSWidgetProvider", "Error ejecutando script $scriptName para widget $appWidgetId", e)
+                    views.setTextViewText(R.id.widget_title, scriptName?.removeSuffix(".js") ?: "Error")
+                    views.setTextViewText(R.id.widget_body, "Error: $errorMsg")
                 }
-            } catch (e: Exception) {
-                Log.e("JSWidgetProvider", "Error al actualizar widget $appWidgetId con script $scriptName", e)
-                views.setTextViewText(R.id.widget_title, scriptName.removeSuffix(".js"))
-                views.setTextViewText(R.id.widget_body, "Error al ejecutar script: ${e.message?.take(50)}")
-            }
-            appWidgetManager.updateAppWidget(appWidgetId, views)
+                Handler(Looper.getMainLooper()).post {
+                    appWidgetManager.updateAppWidget(appWidgetId, views)
+                }
+            }.start()
         }
 
         private fun ensureRhinoContextFactoryInitialized() {
@@ -112,25 +146,63 @@ class JSWidgetProvider : AppWidgetProvider() {
             }
         }
 
+        /**
+         * Ejecuta un script JavaScript puro y retorna el resultado.
+         * Los scripts deben retornar un objeto con las siguientes propiedades opcionales:
+         * - title: string (título del widget)
+         * - body: string (contenido del widget)
+         * - backgroundColor: string (color de fondo en formato hex, ej: "#FF0000")
+         * - textColor: string (color del texto en formato hex)
+         * - textSize: number (tamaño del texto en sp)
+         * - textAlign: string ("left", "center", "right")
+         */
         private fun executeJsScript(script: String): Scriptable? = runCatching {
             ensureRhinoContextFactoryInitialized()
             ContextFactory.getGlobal().call { rhino ->
                 rhino.optimizationLevel = -1 // Necesario para Android
                 val scope: Scriptable = rhino.initStandardObjects()
+                // Inyectar variable para indicar que NO es preview
+                scope.put("IS_PREVIEW", scope, false)
+                // Inyectar función httpGet para peticiones HTTP desde JS puro
+                scope.put("httpGet", scope, object : BaseFunction() {
+                    override fun call(cx: org.mozilla.javascript.Context?, scope: Scriptable?, thisObj: Scriptable?, args: Array<out Any>?): Any {
+                        val urlString = args?.getOrNull(0)?.toString() ?: return "Error: url vacío"
+                        return try {
+                            val url = URL(urlString)
+                            val connection = url.openConnection() as HttpURLConnection
+                            connection.requestMethod = "GET"
+                            connection.connectTimeout = 8000
+                            connection.readTimeout = 8000
+                            val responseCode = connection.responseCode
+                            if (responseCode == 200) {
+                                connection.inputStream.bufferedReader().use { it.readText() }
+                            } else {
+                                "Error: HTTP $responseCode"
+                            }
+                        } catch (e: Exception) {
+                            Log.e("JSWidgets-httpGet", "Error en httpGet para url: $urlString", e)
+                            "Error: ${e.message ?: e.javaClass.simpleName}"
+                        }
+                    }
+                })
+                // Deshabilitar acceso a clases Java
+                rhino.setClassShutter { _ -> false }
+                
+                Log.d("JSWidgetProvider", "Contexto de Rhino inicializado. Ejecutando script...")
                 // Evalúa el script. El resultado de la última expresión es devuelto.
                 val result = rhino.evaluateString(scope, script, "JSWidgetScript", 1, null)
+                Log.d("JSWidgetProvider", "Resultado de evaluateString: $result (tipo: ${result?.javaClass?.name})")
                 if (result is Scriptable) {
+                    Log.d("JSWidgetProvider", "El resultado es un objeto Scriptable")
                     result // Devuelve el objeto Scriptable si el script retorna un objeto
                 } else {
-                    // Si el script no devuelve un objeto explícitamente (ej. solo un string o número),
-                    // no podemos hacer get("title"). En este MVP, esperamos un objeto.
-                    // Podrías envolver el resultado si no es Scriptable, o manejarlo diferente.
-                    Log.w("JSWidgetProvider", "El resultado del script no fue un objeto Scriptable: ${result?.javaClass?.name}")
+                    // Si el script no devuelve un objeto explícitamente, mostramos un error
+                    Log.w("JSWidgetProvider", "El script debe retornar un objeto. Ejemplo: ({ title: 'Mi Widget', body: 'Contenido' })")
                     null 
                 }
             }
         }.onFailure { e -> 
-            Log.e("JSWidgetProvider", "Error detallado en ejecución de Rhino:", e) // Loguear excepción completa
+            Log.e("JSWidgetProvider", "Error detallado en ejecución de Rhino:", e)
         }.getOrNull()
 
         // La extensión 'use' ya no es estrictamente necesaria si usamos ContextFactory.getGlobal().call

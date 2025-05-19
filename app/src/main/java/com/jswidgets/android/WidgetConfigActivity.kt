@@ -18,7 +18,7 @@ private const val PREF_PREFIX_KEY = "widget_script_"
 class WidgetConfigActivity : AppCompatActivity() {
     private var appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID
     private lateinit var scriptsListView: ListView
-    private val exampleScripts = arrayOf("time_widget.js", "date_widget.js", "greeting_widget.js", "btc_price_widget.js") // Añadido btc_price_widget.js
+    private lateinit var exampleScripts: Array<String>
 
     public override fun onCreate(icicle: Bundle?) {
         super.onCreate(icicle)
@@ -26,6 +26,13 @@ class WidgetConfigActivity : AppCompatActivity() {
         setContentView(R.layout.widget_config_activity) // Necesitaremos este layout
 
         scriptsListView = findViewById<ListView>(R.id.scripts_list_view) // Necesitaremos este ID en el layout
+
+        // Leer automáticamente todos los scripts .js en assets/scripts
+        exampleScripts = try {
+            assets.list("scripts")?.filter { it.endsWith(".js") }?.toTypedArray() ?: emptyArray()
+        } catch (e: Exception) {
+            emptyArray()
+        }
 
         val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, exampleScripts)
         scriptsListView.adapter = adapter

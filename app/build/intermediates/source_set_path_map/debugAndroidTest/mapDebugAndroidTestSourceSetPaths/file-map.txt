@@ -1,0 +1,4 @@
+com.jswidgets.android.test.app-androidTest-0 /Users/martinsmith/Desktop/AndroidWidgets/app/build/generated/res/resValues/androidTest/debug
+com.jswidgets.android.test.app-mergeDebugAndroidTestResources-1 /Users/martinsmith/Desktop/AndroidWidgets/app/build/intermediates/incremental/debugAndroidTest/mergeDebugAndroidTestResources/merged.dir
+com.jswidgets.android.test.app-mergeDebugAndroidTestResources-2 /Users/martinsmith/Desktop/AndroidWidgets/app/build/intermediates/incremental/debugAndroidTest/mergeDebugAndroidTestResources/stripped.dir
+com.jswidgets.android.test.app-debugAndroidTest-3 /Users/martinsmith/Desktop/AndroidWidgets/app/build/intermediates/merged_res/debugAndroidTest/mergeDebugAndroidTestResources
