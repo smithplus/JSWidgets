@@ -3050,6 +3050,7 @@ id scale
 id screen
 id script_color_indicator
 id script_icon
+id script_item_root
 id script_name_text
 id scripts_list_view
 id scroll
@@ -3552,6 +3553,7 @@ string status_bar_notification_info_overflow
 string switch_role
 string tab
 string template_percent
+string widget_load_error
 style AlertDialog_AppCompat
 style AlertDialog_AppCompat_Light
 style Animation_AppCompat_Dialog

@@ -39,9 +39,9 @@ Esta herramienta busca empoderar a usuarios técnicos con una forma flexible de 
 
 * **Interfaz de Usuario Principal:**
   * Pantalla principal con listado de scripts de usuario y ejemplos.
-  * Diseño de items de script con colores cíclicos, icono y menú de acciones (Editar, Renombrar, Borrar).
+  * Diseño de items de script con colores cíclicos, icono personalizable (seleccionable por el usuario) y menú de acciones (Editar, Renombrar, Borrar).
   * Diálogos de confirmación para borrado y renombrado.
-  * Editor de scripts integrado con resaltado de sintaxis (monoespaciado).
+  * Editor de scripts integrado con resaltado de sintaxis (monoespaciado) y selector de iconos.
   * Funcionalidad de búsqueda de scripts (placeholder).
 * **Gestión de Scripts:**
   * Creación, edición, renombrado y borrado de scripts.
@@ -89,9 +89,10 @@ JSWidgets se inspira en la flexibilidad y potencia de Scriptable en iOS, buscand
 
 ##### **🗂️ Importador y Gestor de Scripts**
 
-* Carga scripts `.js` desde el almacenamiento externo del dispositivo (directorio específico de la app).
+* Carga scripts `.js` desde el almacenamiento externo del dispositivo (directorio específico de la app y directorio público `Documents/JSWidgets`).
 * Carga scripts de ejemplo empaquetados en los `assets`.
-* Interfaz para listar, crear, editar, renombrar y eliminar scripts.
+* Interfaz para listar, crear, editar (incluyendo icono), renombrar y eliminar scripts.
+* Icono personalizable para cada script, visible en las listas y el editor.
 
 ##### **📜 Motor de Ejecución JS**
 
@@ -212,15 +213,16 @@ return {
 
 ##### **📦 Fase 1 (MVP - Mayormente Completada)**
 
-* Ejecutar script JS desde archivo (assets y almacenamiento externo). ✔️
+* Ejecutar script JS desde archivo (assets y almacenamiento externo, incluyendo `Documents/JSWidgets`). ✔️
 * Retornar una estructura JSON con datos para el widget. ✔️
 * Mostrar contenido y aplicar estilos básicos (texto, color de fondo/texto, tamaño, alineación) en el widget. ✔️
 * Actualización de widgets por intervalo y al configurar. ✔️
-* Editor visual interno para scripts. ✔️
-* Actividad de configuración para seleccionar script al añadir widget. ✔️
-* Funcionalidades básicas de gestión de scripts (crear, listar, editar, renombrar, borrar). ✔️
+* Editor visual interno para scripts, con selector de iconos. ✔️
+* Actividad de configuración para seleccionar script al añadir widget (mostrando iconos y colores). ✔️
+* Funcionalidades básicas de gestión de scripts (crear, listar, editar [incluyendo selección de icono], renombrar, borrar). ✔️
 * Permisos de internet y almacenamiento. ✔️
 * Acceso a APIs Java limitadas desde JS (URL, JSONObject). ✔️
+* Visualización de iconos personalizados en las listas de scripts. ✔️
 
 ##### **🛠️ Fase 2 (En progreso y Próximos Pasos)**
 

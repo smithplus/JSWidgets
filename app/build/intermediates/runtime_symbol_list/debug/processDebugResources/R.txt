@@ -3049,6 +3049,7 @@ int id scale 0x7f080147
 int id screen 0x7f080148
 int id script_color_indicator 0x7f080149
 int id script_icon 0x7f08014a
+int id script_item_root 0x7f0801d1
 int id script_name_text 0x7f08014b
 int id scripts_list_view 0x7f08014c
 int id scroll 0x7f08014d
@@ -3551,6 +3552,7 @@ int string status_bar_notification_info_overflow 0x7f1000ac
 int string switch_role 0x7f1000ad
 int string tab 0x7f1000ae
 int string template_percent 0x7f1000af
+int string widget_load_error 0x7f1000b0
 int style AlertDialog_AppCompat 0x7f110000
 int style AlertDialog_AppCompat_Light 0x7f110001
 int style Animation_AppCompat_Dialog 0x7f110002

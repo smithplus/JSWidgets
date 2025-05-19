@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.jswidgets.android.app-mergeDebugResources-54:/values-cs/values-cs.xml",
+            "outputFile": "com.jswidgets.android.app-mergeDebugResources-55:/values-cs/values-cs.xml",
             "map": [
                 {
                     "source": "/Users/martinsmith/.gradle/caches/8.10.2/transforms/0432c012dc772f8431a3e554bf85c09d/transformed/ui-1.4.0/res/values-cs/values-cs.xml",

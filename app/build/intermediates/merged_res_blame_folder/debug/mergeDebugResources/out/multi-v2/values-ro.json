@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.jswidgets.android.app-mergeDebugResources-54:/values-ro/values-ro.xml",
+            "outputFile": "com.jswidgets.android.app-mergeDebugResources-55:/values-ro/values-ro.xml",
             "map": [
                 {
                     "source": "/Users/martinsmith/.gradle/caches/8.10.2/transforms/f16f8f9dbe5dc46dd4910c880a14038d/transformed/material-1.8.0/res/values-ro/values-ro.xml",

@@ -4,8 +4,9 @@ ADDED from /Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifes
 INJECTED from /Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:2:1-43:12
 INJECTED from /Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:2:1-43:12
 INJECTED from /Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml:2:1-43:12
-MERGED from [androidx.compose.material:material-icons-core:1.4.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/37f98bee9a99c2f46dfdd8e4e20f5a03/transformed/material-icons-core-1.4.0/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.compose.material:material-ripple:1.4.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/890e0de40c488bd890892f27d62483f0/transformed/material-ripple-1.4.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.compose.material:material-icons-extended:1.4.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/cff55ddf64266fcb7cdde12179e8eef7/transformed/material-icons-extended-1.4.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.compose.material:material-icons-core:1.4.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/37f98bee9a99c2f46dfdd8e4e20f5a03/transformed/material-icons-core-1.4.0/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.compose.animation:animation-core:1.4.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/cfedb55ddafc80a90fab113be87033bf/transformed/animation-core-1.4.0/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.compose.animation:animation:1.4.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/2ae6afa87c284c966ebee40d273e386b/transformed/animation-1.4.0/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.compose.foundation:foundation-layout:1.4.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/474a28eb1492ba20c2a34ac5911b755f/transformed/foundation-layout-1.4.0/AndroidManifest.xml:17:1-22:12
@@ -174,10 +175,12 @@ uses-sdk
 INJECTED from /Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from /Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml
 INJECTED from /Users/martinsmith/Desktop/AndroidWidgets/app/src/main/AndroidManifest.xml
-MERGED from [androidx.compose.material:material-icons-core:1.4.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/37f98bee9a99c2f46dfdd8e4e20f5a03/transformed/material-icons-core-1.4.0/AndroidManifest.xml:20:5-44
-MERGED from [androidx.compose.material:material-icons-core:1.4.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/37f98bee9a99c2f46dfdd8e4e20f5a03/transformed/material-icons-core-1.4.0/AndroidManifest.xml:20:5-44
 MERGED from [androidx.compose.material:material-ripple:1.4.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/890e0de40c488bd890892f27d62483f0/transformed/material-ripple-1.4.0/AndroidManifest.xml:20:5-44
 MERGED from [androidx.compose.material:material-ripple:1.4.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/890e0de40c488bd890892f27d62483f0/transformed/material-ripple-1.4.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.compose.material:material-icons-extended:1.4.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/cff55ddf64266fcb7cdde12179e8eef7/transformed/material-icons-extended-1.4.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.compose.material:material-icons-extended:1.4.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/cff55ddf64266fcb7cdde12179e8eef7/transformed/material-icons-extended-1.4.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.compose.material:material-icons-core:1.4.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/37f98bee9a99c2f46dfdd8e4e20f5a03/transformed/material-icons-core-1.4.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.compose.material:material-icons-core:1.4.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/37f98bee9a99c2f46dfdd8e4e20f5a03/transformed/material-icons-core-1.4.0/AndroidManifest.xml:20:5-44
 MERGED from [androidx.compose.animation:animation-core:1.4.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/cfedb55ddafc80a90fab113be87033bf/transformed/animation-core-1.4.0/AndroidManifest.xml:20:5-44
 MERGED from [androidx.compose.animation:animation-core:1.4.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/cfedb55ddafc80a90fab113be87033bf/transformed/animation-core-1.4.0/AndroidManifest.xml:20:5-44
 MERGED from [androidx.compose.animation:animation:1.4.0] /Users/martinsmith/.gradle/caches/8.10.2/transforms/2ae6afa87c284c966ebee40d273e386b/transformed/animation-1.4.0/AndroidManifest.xml:20:5-44

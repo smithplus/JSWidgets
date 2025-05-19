@@ -25,13 +25,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.ColorUtils
 import com.jswidgets.android.model.Widget
 import com.jswidgets.android.ui.theme.JSWidgetsTheme
 import com.jswidgets.android.viewmodel.WidgetViewModel
@@ -44,6 +47,12 @@ import java.net.URL
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.filled.*
+import androidx.compose.ui.graphics.vector.ImageVector
 
 // Lista de colores para los items de script
 val scriptColors = listOf(
@@ -58,6 +67,43 @@ val scriptColors = listOf(
     Color(0xFFCDDC39), // Lime
     Color(0xFFFF5722)  // Deep Orange
 )
+
+// Definición de iconos seleccionables (ImageVector y su nombre)
+val selectableMaterialIcons: List<Pair<ImageVector, String>> = listOf(
+    Icons.Filled.Star to "Star",
+    Icons.Filled.Favorite to "Favorite",
+    Icons.Filled.Settings to "Settings",
+    Icons.Filled.Info to "Info",
+    Icons.Filled.Home to "Home",
+    Icons.Filled.AccountCircle to "AccountCircle",
+    Icons.Filled.Search to "Search",
+    Icons.Filled.Delete to "Delete",
+    Icons.Filled.AddCircle to "AddCircle",
+    Icons.Filled.CheckCircle to "CheckCircle",
+    Icons.Filled.Warning to "Warning",
+    Icons.Filled.Place to "Place",
+    Icons.Filled.DateRange to "DateRange",
+    Icons.Filled.Build to "Build",
+    Icons.Filled.Call to "Call",
+    Icons.Filled.Email to "Email",
+    Icons.Filled.ShoppingCart to "ShoppingCart",
+    Icons.Filled.ThumbUp to "ThumbUp",
+    Icons.Filled.Visibility to "Visibility",
+    Icons.Filled.CloudQueue to "CloudQueue",
+    Icons.Filled.EmojiObjects to "Lightbulb",
+    Icons.Filled.Lock to "Lock",
+    Icons.Filled.Notifications to "Notifications",
+    Icons.Filled.Share to "Share"
+)
+
+// Función para obtener un ImageVector por su nombre
+fun getIconByName(name: String?): ImageVector {
+    return selectableMaterialIcons.find { it.second == name }?.first ?: Icons.Filled.Star // Icono por defecto
+}
+
+// Icono por defecto para nuevos widgets o si el nombre no se encuentra
+val DefaultMaterialIcon = Icons.Filled.Star
+val DefaultMaterialIconName = "Star"
 
 class MainActivity : ComponentActivity() {
     private val viewModel: WidgetViewModel by viewModels()
@@ -227,13 +273,22 @@ fun WidgetListScreen(
 @Composable
 fun WidgetItem(
     widget: Widget,
-    color: Color,
+    color: androidx.compose.ui.graphics.Color,
     onItemClick: () -> Unit,
     onEditActionClick: () -> Unit,
     onRenameActionClick: () -> Unit,
     onDeleteActionClick: () -> Unit
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
+
+    // Determinar el color de texto/icono basado en la luminosidad del color de fondo
+    // Alternativa usando ColorUtils de AndroidX Core
+    val backgroundColorInt = color.toArgb()
+    val contentColor = if (ColorUtils.calculateLuminance(backgroundColorInt) > 0.5) {
+        androidx.compose.ui.graphics.Color.Black
+    } else {
+        androidx.compose.ui.graphics.Color.White
+    }
 
     Row(
         modifier = Modifier
@@ -245,15 +300,15 @@ fun WidgetItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            Icons.Filled.Star, 
+            imageVector = getIconByName(widget.iconName),
             contentDescription = "Script Icon",
-            tint = Color.White,
-            modifier = Modifier.size(28.dp)
+            tint = contentColor,
+            modifier = Modifier.size(24.dp)
         )
         Spacer(Modifier.width(16.dp))
         Text(
             text = widget.name,
-            style = MaterialTheme.typography.h6.copy(color = Color.White),
+            style = MaterialTheme.typography.subtitle1.copy(color = contentColor),
             modifier = Modifier.weight(1f)
         )
         Spacer(Modifier.width(16.dp))
@@ -363,11 +418,13 @@ fun WidgetEditorScreen(
 ) {
     var name by remember { mutableStateOf(widget.name) }
     var scriptContent by remember { mutableStateOf(widget.scriptContent) }
+    var selectedIconName by remember { mutableStateOf(widget.iconName ?: DefaultMaterialIconName) }
     var showError by remember { mutableStateOf(false) }
     var showPreview by remember { mutableStateOf(false) }
     var previewResult by remember { mutableStateOf<org.mozilla.javascript.Scriptable?>(null) }
     var previewError by remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
+    var showIconPickerDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -406,7 +463,8 @@ fun WidgetEditorScreen(
                         val widgetBeingEdited = widget
                         val updatedWidget = widgetBeingEdited.copy(
                             name = name,
-                            scriptContent = scriptContent
+                            scriptContent = scriptContent,
+                            iconName = selectedIconName
                         )
                         onSave(updatedWidget)
                     } else {
@@ -418,15 +476,23 @@ fun WidgetEditorScreen(
             }
         }
 
-        OutlinedTextField(
-            value = name,
-            onValueChange = { name = it },
-            label = { Text("Nombre del Script") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            singleLine = true
-        )
+        Row(Modifier.fillMaxWidth().padding(bottom = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = { showIconPickerDialog = true }) {
+                Icon(
+                    imageVector = getIconByName(selectedIconName),
+                    contentDescription = "Seleccionar Icono",
+                    tint = MaterialTheme.colors.primary
+                )
+            }
+            Spacer(Modifier.width(8.dp))
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text("Nombre del Script") },
+                modifier = Modifier.weight(1f),
+                singleLine = true
+            )
+        }
 
         if (showError) {
             Text(
@@ -454,6 +520,16 @@ fun WidgetEditorScreen(
                 onDismiss = { showPreview = false }
             )
         }
+    }
+
+    if (showIconPickerDialog) {
+        IconPickerDialog(
+            onIconSelected = { iconName ->
+                selectedIconName = iconName
+                showIconPickerDialog = false
+            },
+            onDismiss = { showIconPickerDialog = false }
+        )
     }
 }
 
@@ -606,6 +682,46 @@ fun PreviewWidgetDialog(
                 }
             } else {
                 Text("No hay resultado para mostrar.")
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cerrar")
+            }
+        }
+    )
+}
+
+@Composable
+fun IconPickerDialog(
+    onIconSelected: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Seleccionar Icono") },
+        text = {
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(minSize = 60.dp),
+                contentPadding = PaddingValues(8.dp)
+            ) {
+                items(selectableMaterialIcons) { (iconVector, iconName) ->
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onIconSelected(iconName) }
+                            .padding(vertical = 8.dp, horizontal = 4.dp)
+                    ) {
+                        Icon(
+                            imageVector = iconVector,
+                            contentDescription = iconName,
+                            modifier = Modifier.size(36.dp),
+                            tint = MaterialTheme.colors.onSurface
+                        )
+                        Text(iconName, fontSize = 10.sp, maxLines = 2, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                    }
+                }
             }
         },
         confirmButton = {

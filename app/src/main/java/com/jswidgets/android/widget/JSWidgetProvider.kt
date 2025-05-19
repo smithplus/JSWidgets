@@ -58,7 +58,7 @@ class JSWidgetProvider : AppWidgetProvider() {
                 }
 
                 try {
-                    val userWidgetsDir = File(context.getExternalFilesDir(null), "widgets")
+                    val userWidgetsDir = File(context.getExternalFilesDir(null), "JSWidgets")
                     val userScriptFile = File(userWidgetsDir, scriptName)
                     lateinit var scriptContent: String
                     lateinit var scriptSource: String
